@@ -1,0 +1,18 @@
+
+j=1;
+for i in *; 
+do mv "$i" "$j".jpg; 
+let j=j+1;
+done
+
+perl bin/createsamples.pl positives.txt negatives.txt samples 7000\
+  "opencv_createsamples -bgcolor 0 -bgthresh 0 -maxxangle 0\
+  -maxyangle 0 maxzangle 0.09 -maxidev 40 -w 50 -h 75"
+
+opencv_traincascade -data classifier -vec samples.vec -bg negatives.txt\
+  -numStages 20 -minHitRate 0.999 -maxFalseAlarmRate 0.5 -numPos 6000\
+  -numNeg 4000 -w 50 -h 75 -mode ALL -precalcValBufSize 1024\
+  -precalcIdxBufSize 1024 
+
+opencv_createsamples -vec samples.vec -w 50 -h 75
+
